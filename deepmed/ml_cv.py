@@ -1,9 +1,10 @@
 import numpy as np
 import random
 import pandas as pd
-import dnn
-import gbm
-import rf
+from  deepmed.dnn import dnn
+from deepmed.gbm import gbm_out
+from deepmed.rf import rf_out
+from deepmed.lasso import ls_out
 
 def ml_cv(ytrain, xtrain,method, hyper_grid,t):
     if method=='DNN':
@@ -26,7 +27,7 @@ def ml_cv(ytrain, xtrain,method, hyper_grid,t):
     for i in range(1,4):
         if i==1:
             tesample=sample1
-            trsample= np.append(sample2,sample2)
+            trsample= np.append(sample2,sample3)
         if i==2:
             tesample=sample3
             trsample= np.append(sample1,sample2)
@@ -37,21 +38,18 @@ def ml_cv(ytrain, xtrain,method, hyper_grid,t):
             
         if method=='DNN':
             temp=dnn(ytrain[trsample],xtrain[trsample,:], ytrain[tesample],xtrain[tesample,:],hyper_grid.iloc[t,:])
-            loss.append(temp[1])
-            epoch_opt.append(temp.epoch_opt)
+            loss.append(temp[0])
+            epoch_opt.append(temp[2])
             out = np.append(hyper_grid.iloc[t,:],np.mean(loss))
-            out[:,4]= np.mean(epoch_opt)
-            
+            out[3]= np.mean(epoch_opt)
         if method=='GBM':
-            #print(hyper_grid.iloc[t,:])
             temp=gbm_out(ytrain[trsample],xtrain[trsample,:], ytrain[tesample],xtrain[tesample,:],hyper_grid.iloc[t,:])  
-            loss.append(temp[1])
-            print(hyper_grid.iloc[t,:].shape)
+            loss.append(temp[0])
             out= np.append(hyper_grid.iloc[t,:],np.mean(loss))
                            
         if method=='RF':
             temp=rf_out(ytrain[trsample],xtrain[trsample,:], ytrain[tesample],xtrain[tesample,:],hyper_grid.iloc[t,:])
-            loss.append(temp[1])
+            loss.append(temp[0])
             out=np.append(hyper_grid.iloc[t,:],np.mean(loss))
                           
     return out

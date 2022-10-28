@@ -1,11 +1,11 @@
 import numpy as np
 import random
 import pandas as pd
-import multiprocessing
-import dnn
-import gbm
-import rf
-import lasso
+import multiprocess
+from  deepmed.dnn import dnn
+from deepmed.gbm import gbm_out
+from deepmed.rf import rf_out
+from deepmed.lasso import ls_out
 
 def DeepMed_bin(y,d,m,x,method,hyper,trim=0.05):
     if method=='DNN':
@@ -64,7 +64,7 @@ def DeepMed_bin(y,d,m,x,method,hyper,trim=0.05):
             xtr10=xtr[(dtr==1) & (mtr==0),:]
             xtr01=xtr[(dtr==0) & (mtr==1),:]
             xtr00=xtr[(dtr==0) & (mtr==0),:]
-        # tr stands for first training data, te for test data, "1" and "0" for subsamples with treated and nontreated
+# tr stands for first training data, te for test data, "1" and "0" for subsamples with treated and nontreated
 
 
         # predict Pr(M=1|D=1,X) in test data
@@ -92,17 +92,18 @@ def DeepMed_bin(y,d,m,x,method,hyper,trim=0.05):
         d = [xte,xte,xte,xte,xte,xte,xte,xte,xte]
         e = [hyper[:,0],hyper[:,1],hyper[:,2],hyper[:,3],hyper[:,4],hyper[:,5],hyper[:,6],hyper[:,7],hyper[:,8]]
         
-        out = pool.map(ml.ypred(), zip(a,b,c,d,e))
-        pm1te = out[:,0]
-        pm0te = out[:,1]
-        pdte = out[:,2]
-        eymx11te = out[:,3]
-        eymx01te = out[:,4]
-        eymx10te = out[:,5]
-        eymx00te = out[:,6]
-        eyx1te = out[:,7]
-        eyx0te = out[:,8]
-        hyper=hyper[:,0:8]
+        out = pool.map(ml, zip(a,b,c,d,e))
+        pool.close()
+        pm1te = out[:,0][1]
+        pm0te = out[:,1][1]
+        pdte = out[:,2][1]
+        eymx11te = out[:,3][1]
+        eymx01te = out[:,4][1]
+        eymx10te = out[:,5][1]
+        eymx00te = out[:,6][1]
+        eyx1te = out[:,7][1]
+        eyx0te = out[:,8][1]
+        hyper=hyper[:,9:]
         
         # predict E(Y| D=0, M, X) in test data
         eymx0te=mte*eymx01te+(1-mte)*eymx00te

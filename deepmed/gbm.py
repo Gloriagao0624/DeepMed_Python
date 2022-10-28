@@ -11,8 +11,8 @@ def gbm_out(y, x, ytest, xtest, hyper):
     if train_ybin==1:
         model = GradientBoostingClassifier()
         model.fit(x,y)
-        ypred = model.predict_proba(xtest)
-        loss = -np.mean(ytest*log(ypred) + (1-ytest)*log(1-ypred))
+        ypred = model.predict_proba(xtest)[:,1]
+        loss = -np.mean(ytest*np.log(ypred) + (1-ytest)*np.log(1-ypred))
     else:
         model = GradientBoostingRegressor()
         model.fit(x,y)

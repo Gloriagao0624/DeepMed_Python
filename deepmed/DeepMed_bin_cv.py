@@ -82,7 +82,7 @@ def DeepMed_bin_cv(y,d,m,x,method,hyper_grid,epochs,batch_size):
         out = pool.starmap(ml_cv,tasks)
         for i in range(1,10):
             outi=out[:,1:(n_hyper+1)]
-            out=out[:,1:(n_hyper+1)]
+            out=out[:,n_hyper+1:]
             loc = np.argmin(outi[:,(n_hyper+1)])
             hyper_k = pd.concat([hyper_k,outi[loc,:]], axis=1)
             
