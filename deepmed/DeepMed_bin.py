@@ -18,7 +18,7 @@ def DeepMed_bin(y,d,m,x,method,hyper,trim=0.05):
         ml=ls_out
     
     
-    stepsize= np.ceil((1/3)*len(d))
+    stepsize= int(np.ceil((1/3)*len(d)))
     random.seed(1)
     
     idx = [i for i in range(len(d))]
