@@ -25,7 +25,7 @@ def expand_grid(*para):
 
 
 class DeepMed:
-    def __init__(self,y,d,m,x,method="DNN",hyper_grid=None,epochs=10,batch_size=100,trim=0.05):
+    def __init__(self,y,d,m,x,method="DNN",hyper_grid=None,epochs=500,batch_size=100,trim=0.05):
         self.y = y
         self.d = d
         self.m = m
@@ -37,8 +37,8 @@ class DeepMed:
         self.trim = trim
     def run(self):
         if self.method !="Lasso":
-            self.hyper_grid = pd.DataFrame(hyper_grid)
-            hyper=DeepMed_cv(y,d,m,x,method,hyper_grid,epochs,batch_size)
+            self.hyper_grid = pd.DataFrame(self.hyper_grid)
+            hyper=DeepMed_cv(self.y,self.d,self.m,self.x,self.method,self.hyper_grid,self.epochs,self.batch_size)
         else:
             hyper = np.empty(shape = (2,30))
         mbin = 1*((len(np.unique(self.m))==2) & (min(self.m)==0) & (max(self.m)==1))
