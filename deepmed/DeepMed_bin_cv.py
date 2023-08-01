@@ -8,7 +8,7 @@ def DeepMed_bin_cv(y,d,m,x,method,hyper_grid,epochs,batch_size):
         hyper_grid= pd.concat([hyper_grid, epochs,batch_size], axis=1)
         
     n_hyper= hyper_grid.shape[1]
-    stepsize= np.ceil((1/3)*len(d))
+    stepsize= int(np.ceil((1/3)*len(d)))
     
     random.seed(1)
     
