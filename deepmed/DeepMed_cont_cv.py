@@ -25,7 +25,7 @@ def DeepMed_cont_cv(y,d,m,x,method,hyper_grid,epochs,batch_size):
     n_hyper= hyper_grid.shape[1]
     hyper = pd.DataFrame()
     
-    stepsize= np.ceil((1/3)*len(d))
+    stepsize= int(np.ceil((1/3)*len(d)))
     nobs = min(3*stepsize,len(d))
     random.seed(1)
     idx = [i for i in range(int(nobs))]
