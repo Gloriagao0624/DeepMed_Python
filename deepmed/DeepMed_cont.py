@@ -20,7 +20,7 @@ def DeepMed_cont(y,d,m,x,method,hyper,trim=0.05):
         ml=ls_out
     xm = np.append(x,m,axis=1)
     
-    stepsize= np.ceil((1/3)*len(d))
+    stepsize= int(np.ceil((1/3)*len(d)))
     nobs = min(3*stepsize,len(d))
     random.seed(1)
     idx = [i for i in range(nobs)]
