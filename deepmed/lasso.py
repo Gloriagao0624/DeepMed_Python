@@ -8,12 +8,12 @@ from sklearn.metrics import mean_squared_error
 def ls_out(y, x, ytest, xtest,hyper=None):
     train_ybin=1*((len(np.unique(y))==2) & (min(y)==0) & (max(y)==1))
     if train_ybin==1:
-        reg = LogisticRegression()
+        reg = LogisticRegression(penalty='l1', solver='liblinear')
         reg.fit(x, y)
         ypred = reg.predict_proba(xtest)[:,1]
         loss = -np.mean(ytest*np.log(ypred) + (1-ytest)*np.log(1-ypred))
     else:
-        reg = Lasso()
+        reg = Lasso(alpha=0.1)
         reg.fit(x,y)
         ypred = reg.predict(xtest)
         loss = mean_squared_error(ytest, ypred)
