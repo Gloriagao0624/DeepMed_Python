@@ -11,7 +11,7 @@ pip install deepmed
 ```
 Import the module
 ```
-from deepmed import DeepMed
+from deepmed import *
 ```
 
 ## Parameters
