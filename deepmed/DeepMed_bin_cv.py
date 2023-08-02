@@ -12,8 +12,10 @@ def DeepMed_bin_cv(y,d,m,x,method,hyper_grid,epochs,batch_size):
     
     random.seed(1)
     
-    idx = [i for i in range(len(d))]
-    random.shuffle(idx)
+    # idx = [i for i in range(len(d))]
+    # random.shuffle(idx)
+    idx = np.random.permutation(len(d))
+    
      # crossfitting procedure that splits sample in training an testing data
     for k in range(1,4):
         tesample=idx[int((k-1)*stepsize+1):int(min((k)*stepsize,len(d)))]
@@ -45,8 +47,10 @@ def DeepMed_bin_cv(y,d,m,x,method,hyper_grid,epochs,batch_size):
             xtr00=xtr[(dtr==0) & (mtr==0)]
 
         if ((x.shape[1] == 0) and x.shape[1]>1):
-            xte = x[tesample,:]
-            xtr = np.setdiff1d(x, xtr).view(x.dtype).reshape(-1, x.shape[1]).shape
+            # xte = x[tesample,:]
+            # xtr = np.setdiff1d(x, xtr).view(x.dtype).reshape(-1, x.shape[1]).shape
+            xtr = np.delete(x,tesample,axis=0)
+            xte = x[tesample]
             xtr1=xtr[dtr==1,:]
             xtr0=xtr[dtr==0,:]
             xtr11=xtr[(dtr==1) & (mtr==1),:]
