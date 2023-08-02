@@ -21,19 +21,21 @@ def DeepMed_cont_cv(y,d,m,x,method,hyper_grid,epochs,batch_size):
         ml=rf_out
     if method=='Lasso':
         ml=ls_out
-    xm = np.append(x,m,axis=1)
+    # xm = np.append(x,m,axis=1)
+    xm = np.column_stack((x,m))
     n_hyper= hyper_grid.shape[1]
     hyper = pd.DataFrame()
     
     stepsize= int(np.ceil((1/3)*len(d)))
-    nobs = min(3*stepsize,len(d))
-    random.seed(1)
-    idx = [i for i in range(int(nobs))]
-    random.shuffle(idx)
+    nobs = int(min(3*stepsize,len(d)))
+    # random.seed(1)
+    # idx = [i for i in range(int(nobs))]
+    # random.shuffle(idx)
     
+    idx = np.random.permutation(len(d))
     sample1 = idx[0:int(stepsize)]
     sample2 = idx[int(stepsize):int(2*stepsize)]
-    sample3 = idx[int(2*stepsize):]
+    sample3 = idx[int(2*stepsize):nobs]
     
     
     # crossfitting procedure that splits sample in training an testing data
@@ -68,7 +70,7 @@ def DeepMed_cont_cv(y,d,m,x,method,hyper_grid,epochs,batch_size):
                 out2 =  pd.DataFrame(ml_cv(d[trsample],x[trsample,:],method,hyper_grid,t))
                 out3 =  pd.DataFrame(ml_cv(y[musample[np.where(d[musample]==1)[0]]],xm[musample[np.where(d[musample]==1)[0]],:],method,hyper_grid,t))
                 out4 =  pd.DataFrame(ml_cv(y[trsample[np.where(d[trsample]==1)[0]]],x[trsample[np.where(d[trsample]==1)[0]],:],method,hyper_grid,t))
-                out5 =   pd.DataFrame(ml_cv(y[musample[np.where(d[musample]==0)[0]]],xm[musample[np.where(d[musample]==0)[0]],:],method,hyper_grid,t))
+                out5 =  pd.DataFrame(ml_cv(y[musample[np.where(d[musample]==0)[0]]],xm[musample[np.where(d[musample]==0)[0]],:],method,hyper_grid,t))
                 out6 =  pd.DataFrame(ml_cv(y[trsample[np.where(d[trsample]==0)[0]]],x[trsample[np.where(d[trsample]==0)[0]],:],method,hyper_grid,t))
                 outi = pd.concat([out1.T,out2.T,out3.T,out4.T,out5.T,out6.T],axis=1,ignore_index=True)
                 out = out.append(outi)
@@ -91,9 +93,9 @@ def DeepMed_cont_cv(y,d,m,x,method,hyper_grid,epochs,batch_size):
                 out = out.append(outi.T)
         for i in range(0,6):
             outi=out.iloc[:,0: int(n_hyper+1)]
-            #rint(outi.shape)
             out=out.iloc[:,int(n_hyper+1):]
-            loc = np.argmin(outi.iloc[:,-1])
+            # loc = np.argmin(outi.iloc[:,-1])
+            loc = np.argmin(outi.iloc[:,n_hyper])
             hyper_k= pd.concat([hyper_k,pd.DataFrame(outi.iloc[loc,:]).reset_index(drop = True,inplace=False)], axis = 1)
             
         hyper_k.columns=[str(i) for i in [1,2,3,5,6,8]]
@@ -138,9 +140,9 @@ def DeepMed_cont_cv(y,d,m,x,method,hyper_grid,epochs,batch_size):
 
         
         hyper_k = hyper_k.loc[:,['1','2','3','4','5','6','7','8']]
-        hyper_k.loc[n_hyper,:]=round(hyper_k.loc[n_hyper,:],3)
+        hyper_k.loc[n_hyper,:]=np.round(hyper_k.loc[n_hyper,:],3)
         if method=="DNN":
-            hyper_k.loc[3,:]=round(hyper_k.loc[3,:])
+            hyper_k.loc[3,:]=np.round(hyper_k.loc[3,:])
 
         if k==1:                      
             hyper=hyper_k
