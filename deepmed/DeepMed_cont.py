@@ -21,14 +21,15 @@ def DeepMed_cont(y,d,m,x,method,hyper,trim=0.05):
     xm = np.append(x,m,axis=1)
     
     stepsize= int(np.ceil((1/3)*len(d)))
-    nobs = min(3*stepsize,len(d))
+    nobs = int(min(3*stepsize,len(d)))
     random.seed(1)
-    idx = [i for i in range(nobs)]
-    random.shuffle(idx)
+    # idx = [i for i in range(nobs)]
+    # random.shuffle(idx)
+    idx = np.random.permutation(len(d))
     
     sample1 = idx[0:int(stepsize)]
     sample2 = idx[int(stepsize):int(2*stepsize)]
-    sample3 = idx[int(2*stepsize):]
+    sample3 = idx[int(2*stepsize):nobs]
     
     y1m0=list()
     y1m1=list()
@@ -107,21 +108,26 @@ def DeepMed_cont(y,d,m,x,method,hyper,trim=0.05):
         hyper=hyper[:,8:]
         # select observations satisfying trimming restriction
 
-        sel= ((((1-pmxte)*pxte)>=trim) & ((1-pxte)>=trim)  & (pxte>=trim) &  (((pmxte*(1-pxte)))>=trim))
+        sel= 1*((((1-pmxte)*pxte)>=trim) & ((1-pxte)>=trim)  & (pxte>=trim) &  (((pmxte*(1-pxte)))>=trim))
         # ypredict E(Y0,M(1)) in the test data
         temp=((1-dte).flatten()*pmxte/((1-pmxte).flatten()*pxte)*(yte.flatten()-eymx0te)+dte.flatten()/pxte*(eymx0te-regweymx0te)+regweymx0te)
-        y0m1 = y1m0+ temp[sel==1].tolist()
+        # y0m1 = y1m0+ temp[sel==1].tolist()
+        y0m1.extend(temp[sel==1])
         # ypredict E(Y0,M(0)) in the test data
         temp=(eyx0te + (1-dte).flatten()*(yte.flatten()-eyx0te)/(1-pxte))
-        y0m0 = y0m0 + temp[sel==1].tolist()
+        # y0m0 = y0m0 + temp[sel==1].tolist()
+        y0m0.extend(temp[sel==1])
         # ypredict E(Y1,M(0)) in the test data
         temp=(dte.flatten()*(1-pmxte).flatten()/(pmxte*(1-pxte).flatten())*(yte.flatten()-eymx1te)+(1-dte).flatten()/(1-pxte).flatten()*(eymx1te-regweymx1te)+regweymx1te)
-        y1m0 = y1m0+ temp[sel==1].tolist()
+        # y1m0 = y1m0+ temp[sel==1].tolist()
+        y1m0.extend(temp[sel==1])
         # ypredict E(Y1,M(1)) in the test data
         temp=(eyx1te + dte.flatten()*(yte.flatten()-eyx1te)/pxte)
-        y1m1 = y1m1+ temp[sel==1].tolist()
+        # y1m1 = y1m1+ temp[sel==1].tolist()
+        y1m1.extend(temp[sel==1])
         # collect selection dummies
-        selall = selall+ sel.tolist()
+        # selall = selall+ sel.tolist()
+        selall.extend(sel)
     # average over the crossfitting steps
     my1m1=np.mean(y1m1)
     my0m1=np.mean(y0m1)
