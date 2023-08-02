@@ -21,8 +21,9 @@ def DeepMed_bin(y,d,m,x,method,hyper,trim=0.05):
     stepsize= int(np.ceil((1/3)*len(d)))
     random.seed(1)
     
-    idx = [i for i in range(len(d))]
-    random.shuffle(idx)
+    # idx = [i for i in range(len(d))]
+    # random.shuffle(idx)
+    idx = np.random.permutation(len(d))
     # crossfitting procedure that splits sample in training an testing data
     y1m0=list()
     y1m1=list()
@@ -56,8 +57,10 @@ def DeepMed_bin(y,d,m,x,method,hyper,trim=0.05):
             xtr00=xtr[(dtr==0) & (mtr==0)]
 
         if (x.shape[1] == 0 and x.shape[1]>1):
-            xte = x[tesample,:]
-            xtr = np.setdiff1d(x, xtr).view(x.dtype).reshape(-1, x.shape[1]).shape
+            # xte = x[tesample,:]
+            # xtr = np.setdiff1d(x, xtr).view(x.dtype).reshape(-1, x.shape[1]).shape
+            xtr = np.delete(x,tesample,axis=0)
+            xte = x[tesample]
             xtr1=xtr[dtr==1,:]
             xtr0=xtr[dtr==0,:]
             xtr11=xtr[(dtr==1) & (mtr==1),:]
@@ -114,18 +117,18 @@ def DeepMed_bin(y,d,m,x,method,hyper,trim=0.05):
         eta10=(eymx11te*pm0te+eymx10te*(1-pm0te))
         sel= 1*(((pdte*pm1te)>=trim) & ((1-pdte)>=trim)  & (pdte>=trim) &  (((1-pdte)*pm0te)>=trim))
         temp=dte*pm0te/(pdte*pm1te)*(yte-eymx1te)+(1-dte)/(1-pdte)*(eymx1te-eta10)+eta10
-        y1m0= y1m0.append(temp[sel==1])
+        y1m0.extend(temp[sel==1])
         # predict score functions for E(Y(1,M(1))) in the test data
         temp=eyx1te + dte*(yte-eyx1te)/pdte
-        y1m1=y1m1.append(temp[sel==1])
+        y1m1.extend(temp[sel==1])
         # predict score functions for E(Y(0,M(1))) in the test data
         eta01=(eymx01te*pm1te+eymx00te*(1-pm1te))
         temp=(1-dte)*pm1te/((1-pdte)*pm0te)*(yte-eymx0te)+dte/pdte*(eymx0te-eta01)+eta01
-        y0m1=y0m1.append(temp[sel==1])
+        y0m1.extend(temp[sel==1])
         # predict score functions for E(Y0,M(0)) in the test data
         temp=eyx0te + (1-dte)*(yte-eyx0te)/(1-pdte)
-        y0m0=y0m0.append(temp[sel==1])
-        selall= selall.append(sel)
+        y0m0.extend(temp[sel==1])
+        selall.extend(sel)
     # average over the crossfitting steps
     my1m1=np.mean(y1m1)
     my0m1=np.mean(y0m1)
@@ -138,11 +141,17 @@ def DeepMed_bin(y,d,m,x,method,hyper,trim=0.05):
     indir1=my1m1-my1m0
     indir0=my0m1-my0m0
     #compute variances
-    vtot=np.mean(pow((y1m1-y0m0-tot),2))
-    vdir1=np.mean(pow((y1m1-y0m1-dir1),2))
-    vdir0=np.mean(pow((y1m0-y0m0-dir0),2))
-    vindir1=np.mean(pow((y1m1-y1m0-indir1),2))
-    vindir0=np.mean(pow((y0m1-y0m0-indir0),2))
+#     vtot=np.mean(pow((y1m1-y0m0-tot),2))
+#     vdir1=np.mean(pow((y1m1-y0m1-dir1),2))
+#     vdir0=np.mean(pow((y1m0-y0m0-dir0),2))
+#     vindir1=np.mean(pow((y1m1-y1m0-indir1),2))
+#     vindir0=np.mean(pow((y0m1-y0m0-indir0),2))
+    
+    vtot=np.mean(pow((np.array(y1m1)-np.array(y0m0)-tot),2))
+    vdir1=np.mean(pow((np.array(y1m1)-np.array(y0m1)-dir1),2))
+    vdir0=np.mean(pow((np.array(y1m0)-np.array(y0m0)-dir0),2))
+    vindir1=np.mean(pow((np.array(y1m1)-np.array(y1m0)-indir1),2))
+    vindir0=np.mean(pow((np.array(y0m1)-np.array(y0m0)-indir0),2))
 
     ATE = [tot, dir1, dir0, indir1, indir0, vtot, vdir1, vdir0, vindir1, vindir0, sum(selall)]
     return ATE
